@@ -1,10 +1,4 @@
 import { solveLayout, LayoutResult, Line } from "./layout.js";
-<<<<<<< HEAD
-import { createGlyphTable, GlyphEntry, getWidth, PerfectHashTable } from "./hash.js";
-import { PreparedText } from "./engine.js";
-
-function toCodePoints(text: string): Uint32Array {
-=======
 import { createGlyphTable, GlyphEntry, getWidth, PerfectHashTable, warmAsciiCache } from "./hash.js";
 import { PreparedText } from "./engine.js";
 
@@ -13,7 +7,6 @@ import { PreparedText } from "./engine.js";
  * Handles surrogate pairs correctly.
  */
 export function toCodePoints(text: string): Uint32Array {
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   const points: number[] = [];
   for (let i = 0; i < text.length; i++) {
     const code = text.codePointAt(i)!;
@@ -23,18 +16,6 @@ export function toCodePoints(text: string): Uint32Array {
   return new Uint32Array(points);
 }
 
-<<<<<<< HEAD
-export interface LayoutMetrics {
-  width: number;
-  height: number;
-  lines: { width: number; height: number; text: string }[];
-}
-
-export function prepare(
-  text: string,
-  options: { font: string; lineHeight?: number }
-): PreparedText {
-=======
 // ── Proportional width tables ──
 // Based on measured Inter/Helvetica/Arial averages at 1em = 16px.
 // Scaled by fontSize/16. Much more accurate than flat-width for real text.
@@ -144,19 +125,10 @@ export function layoutText(
   const tabSize = opts?.tabSize ?? Math.round(fontSize * 2);
   const collapse = opts?.collapseWhitespace ?? true;
 
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   const codepoints = toCodePoints(text);
   const entries: GlyphEntry[] = [];
   const seen = new Set<number>();
   for (let i = 0; i < codepoints.length; i++) {
-<<<<<<< HEAD
-    if (!seen.has(codepoints[i])) {
-      seen.add(codepoints[i]);
-      entries.push({ codepoint: codepoints[i], fontId: 0, width: 8 });
-    }
-  }
-  const glyphTable = createGlyphTable(entries);
-=======
     const cp = codepoints[i];
     if (!seen.has(cp)) {
       seen.add(cp);
@@ -243,7 +215,6 @@ export function prepare(
   warmAsciiCache(glyphTable);
 
   // Numeric FNV-1a hash of first 64 codepoints
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   let h = 0x811c9dc5;
   const end = Math.min(codepoints.length, 64);
   for (let i = 0; i < end; i++) {
@@ -255,25 +226,13 @@ export function prepare(
   return { codepoints, glyphTable, cacheKey: h >>> 0 };
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Legacy compat: layout a PreparedText at a given width.
  */
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 export function layout(prepared: PreparedText, width: number): LayoutMetrics {
   const result = solveLayout({
     glyphTable: prepared.glyphTable,
     text: prepared.codepoints,
-<<<<<<< HEAD
-    width
-  });
-
-  const lines = result.lines.map((line: Line) => {
-    let text = "";
-    for (let i = line.spans[0].textStart; i < line.spans[0].textEnd; i++) {
-      text += String.fromCodePoint(prepared.codepoints[i]);
-=======
     width,
   });
 
@@ -283,42 +242,19 @@ export function layout(prepared: PreparedText, width: number): LayoutMetrics {
       for (let i = span.textStart; i < span.textEnd; i++) {
         lineText += String.fromCodePoint(prepared.codepoints[i]);
       }
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     }
     return {
       width: line.width,
       height: line.height,
-<<<<<<< HEAD
-      text
-=======
       y: line.y,
       text: lineText,
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     };
   });
 
   return {
     width: result.width,
     height: result.height,
-<<<<<<< HEAD
-    lines
-  };
-}
-
-export function measure(
-  text: string,
-  options: { font: string }
-): number {
-  const prepared = prepare(text, { font: options.font });
-  let totalWidth = 0;
-  for (let i = 0; i < prepared.codepoints.length; i++) {
-    totalWidth += getWidth(prepared.glyphTable, prepared.codepoints[i], 0);
-  }
-  return totalWidth;
-}
-=======
     lines,
     lineCount: lines.length,
   };
 }
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)

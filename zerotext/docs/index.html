@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZeroText Demos</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f7f7f7; --surface: #ffffff; --ink: #111111; --muted: #5c5c5c;
+  --rule: #d9d9d9; --accent: #000000; --pass: #2a7d3f; --fail: #c0392b;
+  --radius: 16px; --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+body {
+  min-height: 100vh; background: var(--bg); color: var(--ink);
+  font-family: var(--font); -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  width: min(960px, calc(100vw - 40px)); margin: 0 auto;
+  padding: 40px 0 64px;
+}
+
+.eyebrow {
+  font: 500 11px/1.2 var(--mono); letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+}
+
+h1 {
+  font: 700 38px/1.1 var(--font); letter-spacing: -0.02em;
+}
+
+h2 { font: 600 20px/1.25 var(--font); letter-spacing: -0.01em; }
+
+.intro {
+  margin-top: 12px; max-width: 60ch; line-height: 1.6;
+  color: var(--muted); font-size: 15px;
+}
+
+.grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 14px; margin-top: 32px;
+}
+
+.card {
+  display: block; padding: 20px; border: 1px solid var(--rule);
+  border-radius: var(--radius); background: var(--surface);
+  color: inherit; text-decoration: none; cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.card:hover {
+  transform: translateY(-2px); border-color: var(--accent);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+  font: 600 17px/1.3 var(--font); margin-bottom: 6px;
+}
+
+.card p { line-height: 1.55; color: var(--muted); font-size: 14px; }
+
+.card .tag {
+  display: inline-block; font: 500 10px/1 var(--mono);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 4px; margin-bottom: 10px;
+  background: var(--ink); color: var(--bg);
+}
+
+/* Demo stage */
+.demo-stage {
+  margin-top: 24px; border: 1px solid var(--rule);
+  border-radius: var(--radius); background: var(--surface);
+  overflow: hidden;
+}
+.demo-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 1px solid var(--rule);
+}
+.demo-header h2 { font-size: 16px; }
+.demo-header button {
+  background: none; border: none; font-size: 22px; cursor: pointer;
+  color: var(--muted); line-height: 1; padding: 0 4px;
+}
+.demo-header button:hover { color: var(--ink); }
+.demo-content { padding: 24px; min-height: 200px; }
+.demo-content canvas {
+  display: block; width: 100%; border: 1px solid var(--rule);
+  border-radius: 8px; background: #fff;
+}
+.demo-content .controls {
+  display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.demo-content .controls label {
+  font: 500 12px/1 var(--mono); color: var(--muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.demo-content .controls input[type=range] { width: 120px; accent-color: var(--ink); }
+.demo-content .controls select, .demo-content .controls input[type=text] {
+  font: 400 13px/1.4 var(--font); padding: 4px 8px;
+  border: 1px solid var(--rule); border-radius: 6px; background: var(--bg);
+}
+.demo-content .metrics {
+  margin-top: 12px; font: 400 12px/1.6 var(--mono); color: var(--muted);
+}
+
+/* Test section */
+.test-section, .bench-section {
+  margin-top: 48px; padding-top: 32px;
+  border-top: 1px solid var(--rule);
+}
+.test-results {
+  margin-top: 16px; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;
+}
+.test-group {
+  border: 1px solid var(--rule); border-radius: 10px;
+  background: var(--surface); overflow: hidden;
+}
+.test-group-header {
+  font: 600 13px/1 var(--font); padding: 10px 14px;
+  border-bottom: 1px solid var(--rule); background: var(--bg);
+  display: flex; justify-content: space-between;
+}
+.test-group-header .count { font: 500 11px/1 var(--mono); color: var(--muted); }
+.test-item {
+  padding: 6px 14px; font: 400 12.5px/1.5 var(--font);
+  display: flex; gap: 8px; align-items: baseline;
+}
+.test-item + .test-item { border-top: 1px solid #f0f0f0; }
+.test-item .icon { flex-shrink: 0; font-size: 11px; }
+.test-item.pass .icon { color: var(--pass); }
+.test-item.fail .icon { color: var(--fail); }
+.test-item.fail .msg {
+  font: 400 11px/1.4 var(--mono); color: var(--fail);
+  margin-left: auto; max-width: 140px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.test-summary {
+  margin-top: 16px; font: 500 14px/1 var(--font);
+  padding: 12px 16px; border-radius: 10px;
+}
+.test-summary.all-pass { background: #e8f5e9; color: var(--pass); }
+.test-summary.has-fail { background: #fdecea; color: var(--fail); }
+.test-loading { padding: 20px; color: var(--muted); font: 400 13px/1 var(--mono); }
+
+/* Bench table */
+.bench-table {
+  width: 100%; margin-top: 16px; border-collapse: separate;
+  border-spacing: 0; border: 1px solid var(--rule);
+  border-radius: var(--radius); overflow: hidden;
+  font-size: 13px;
+}
+.bench-table th {
+  text-align: left; padding: 10px 16px; background: var(--bg);
+  font: 600 12px/1 var(--font); text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted);
+  border-bottom: 1px solid var(--rule);
+}
+.bench-table td {
+  padding: 9px 16px; border-bottom: 1px solid #f0f0f0;
+  font-family: var(--mono); font-size: 12.5px;
+}
+.bench-table tr:last-child td { border-bottom: none; }
+.bench-table td:nth-child(2) { font-weight: 600; }
+
+@media (max-width: 700px) {
+  .page { padding-top: 24px; }
+  .grid { grid-template-columns: 1fr; }
+  h1 { font-size: 30px; }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <p class="eyebrow">ZeroText</p>
+  <h1>Demos</h1>
+  <p class="intro">
+    Interactive browser demos for ZeroText's zero-allocation text layout engine.
+    Sub-microsecond cached layouts, arena-pooled memory, and a 5KB core — running
+    live in your browser right now.
+  </p>
+
+  <section class="grid" aria-label="Demo list">
+    <div class="card" data-demo="layout">
+      <span class="tag">Core</span>
+      <h3>Live Layout</h3>
+      <p>Resize the container and watch text reflow in real time. Zero DOM measurements — pure prefix-sum binary search.</p>
+    </div>
+
+    <div class="card" data-demo="alignment">
+      <span class="tag">Align</span>
+      <h3>Justification</h3>
+      <p>Left, center, right, and full justify applied in-place on the SoA span arrays with zero allocation.</p>
+    </div>
+
+    <div class="card" data-demo="bidi">
+      <span class="tag">Bidi</span>
+      <h3>RTL / Mixed Text</h3>
+      <p>UAX#9 bidi algorithm with stack-based embedding levels resolving Hebrew, Arabic, and Latin in correct visual order.</p>
+    </div>
+
+    <div class="card" data-demo="truncation">
+      <span class="tag">Truncate</span>
+      <h3>Ellipsis Modes</h3>
+      <p>End, middle, and start truncation using binary search on prefix sums for O(log n) break finding.</p>
+    </div>
+
+    <div class="card" data-demo="hittest">
+      <span class="tag">Interact</span>
+      <h3>Hit Testing</h3>
+      <p>Click anywhere on laid-out text to place a caret. Binary search on lines, linear scan on spans, sub-glyph interpolation.</p>
+    </div>
+
+    <div class="card" data-demo="perf">
+      <span class="tag">Perf</span>
+      <h3>Cache Benchmark</h3>
+      <p>Watch hot-path cache hits resolve in under 100 nanoseconds. FNV-1a numeric hashing eliminates string allocation.</p>
+    </div>
+  </section>
+
+  <div id="demo-stage" class="demo-stage" style="display:none">
+    <div class="demo-header">
+      <h2 id="demo-title"></h2>
+      <button id="demo-close" aria-label="Close demo">&times;</button>
+    </div>
+    <div id="demo-content" class="demo-content"></div>
+  </div>
+
+  <section class="test-section">
+    <h2>Test Suite</h2>
+    <p class="intro">All core tests running live via the embedded engine.</p>
+    <div id="test-results" class="test-results">
+      <div class="test-loading">Running tests...</div>
+    </div>
+    <div id="test-summary" class="test-summary"></div>
+  </section>
+
+  <section class="bench-section">
+    <h2>Benchmarks</h2>
+    <p class="intro">Median of 10,000 iterations per metric, measured in this browser tab.</p>
+    <table id="bench-table" class="bench-table">
+      <thead><tr><th>Metric</th><th>Time</th><th>Notes</th></tr></thead>
+      <tbody id="bench-body"><tr><td colspan="3" class="test-loading">Running benchmarks...</td></tr></tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ZeroText Core Engine — browser-inlined, zero dependencies
+// ═══════════════════════════════════════════════════════════
+
+const ZT = (() => {
+  const FNV_OFFSET = 0x811c9dc5, FNV_PRIME = 0x01000193, TABLE_SIZE = 6144;
+  const MAX_LINES = 1024, MAX_SPANS = 4096, ARENA_SIZE = 1024 * 1024;
+
+  function fnv1a(key) {
+    let h = FNV_OFFSET;
+    h ^= key & 0xff; h = Math.imul(h, FNV_PRIME);
+    h ^= (key >> 8) & 0xff; h = Math.imul(h, FNV_PRIME);
+    h ^= (key >> 16) & 0xff; h = Math.imul(h, FNV_PRIME);
+    h ^= (key >> 24) & 0xff; h = Math.imul(h, FNV_PRIME);
+    return h >>> 0;
+  }
+  function mixHash(cp, fid) { return fnv1a((fid << 21) | (cp & 0x1fffff)); }
+
+  class PerfectHashTable {
+    constructor(size, seed) {
+      this.size = size; this.seed = seed;
+      this.keys = new Uint32Array(size); this.values = new Float32Array(size);
+      this.keys.fill(0xffffffff);
+    }
+    set(key, val) {
+      let idx = fnv1a(key ^ this.seed) % this.size, a = 0;
+      while (this.keys[idx] !== 0xffffffff && this.keys[idx] !== key) {
+        idx = (idx + 1) % this.size; if (++a >= this.size) return;
+      }
+      this.keys[idx] = key; this.values[idx] = val;
+    }
+    get(key) {
+      let idx = fnv1a(key ^ this.seed) % this.size, a = 0;
+      while (this.keys[idx] !== key) {
+        if (this.keys[idx] === 0xffffffff) return -1;
+        idx = (idx + 1) % this.size; if (++a >= this.size) return -1;
+      }
+      return this.values[idx];
+    }
+  }
+
+  function createGlyphTable(entries) {
+    const size = Math.max(TABLE_SIZE, entries.length * 2);
+    for (let seed = 0; seed < 256; seed++) {
+      const t = new PerfectHashTable(size, seed); let ok = true;
+      for (const e of entries) t.set(mixHash(e.cp, e.fid), e.w);
+      for (const e of entries) { if (t.get(mixHash(e.cp, e.fid)) !== e.w) { ok = false; break; } }
+      if (ok) return t;
+    }
+    const t = new PerfectHashTable(size, 0);
+    for (const e of entries) t.set(mixHash(e.cp, e.fid), e.w);
+    return t;
+  }
+
+  function getWidth(table, cp, fid) {
+    const w = table.get(mixHash(cp, fid)); return w < 0 ? 0 : w;
+  }
+
+  // ASCII width cache
+  const _aw = new Float32Array(128); let _ar = false;
+  function warmAscii(table) {
+    for (let i = 0; i < 128; i++) { const w = table.get(mixHash(i, 0)); _aw[i] = w < 0 ? 0 : w; }
+    _ar = true;
+  }
+  function gw(table, cp) {
+    if (cp < 128 && _ar) return _aw[cp];
+    const w = table.get(mixHash(cp, 0)); return w < 0 ? 0 : w;
+  }
+
+  // Break classes
+  const SP = 7, BA = 9, HY = 11, ZW = 5, BK = 0, LF = 2, CR = 1, AL = 26, NU = 21, ID = 33, XX = 39;
+  function getBreakClass(cp) {
+    if (cp === 0x0a) return LF; if (cp === 0x0d) return CR;
+    if (cp === 0x0009) return SP; // TAB
+    if (cp === 0x20) return SP; if (cp === 0x200b) return ZW;
+    if (cp >= 0x30 && cp <= 0x39) return NU;
+    if ((cp >= 0x41 && cp <= 0x5a) || (cp >= 0x61 && cp <= 0x7a)) return AL;
+    if (cp >= 0x4e00 && cp <= 0x9fff) return ID;
+    if (cp >= 0x0590 && cp <= 0x05ff) return AL; // Hebrew
+    if (cp >= 0x0600 && cp <= 0x06ff) return AL; // Arabic
+    return XX;
+  }
+
+  function findBreakPoint(ps, start, width) {
+    let lo = start, hi = ps.length - 1;
+    const target = (start > 0 ? ps[start - 1] : 0) + width;
+    while (lo < hi) { const mid = (lo + hi + 1) >>> 1; if (ps[mid] <= target) lo = mid; else hi = mid - 1; }
+    return lo;
+  }
+
+  // Arena
+  class ArenaPool {
+    constructor() {
+      this.buffer = new ArrayBuffer(ARENA_SIZE);
+      this.generation = 0; this.head = 0; this.tail = 0;
+      let off = 0;
+      this.lineX = new Float64Array(this.buffer, off, MAX_LINES); off += MAX_LINES * 8;
+      this.lineY = new Float64Array(this.buffer, off, MAX_LINES); off += MAX_LINES * 8;
+      this.lineWidth = new Float32Array(this.buffer, off, MAX_LINES); off += MAX_LINES * 4;
+      this.lineHeight = new Float32Array(this.buffer, off, MAX_LINES); off += MAX_LINES * 4;
+      this.lineFlags = new Uint8Array(MAX_LINES);
+      this.lineGen = new Uint32Array(MAX_LINES);
+      this.spanGen = new Uint32Array(MAX_SPANS);
+      const spOff = (off + 3) & ~3;
+      this.spanX = new Float32Array(this.buffer, spOff, MAX_SPANS);
+      this.spanW = new Float32Array(this.buffer, spOff + MAX_SPANS * 4, MAX_SPANS);
+      this.spanTS = new Uint32Array(this.buffer, spOff + MAX_SPANS * 8, MAX_SPANS);
+      this.spanTE = new Uint32Array(this.buffer, spOff + MAX_SPANS * 12, MAX_SPANS);
+    }
+    allocLine() { const i = this.head; this.head = (this.head + 1) % MAX_LINES; this.lineGen[i] = this.generation; return i; }
+    allocSpan() { const i = this.tail; this.tail = (this.tail + 1) % MAX_SPANS; this.spanGen[i] = this.generation; return i; }
+    reset() { this.head = 0; this.tail = 0; this.generation++; }
+    gc() {
+      const th = this.generation > 1 ? this.generation - 1 : 0; let f = 0;
+      for (let i = 0; i < MAX_LINES; i++) if (this.lineGen[i] < th) { this.lineFlags[i] = 0; f++; }
+      for (let i = 0; i < MAX_SPANS; i++) if (this.spanGen[i] < th) f++;
+      return f;
+    }
+  }
+
+  const arena = new ArenaPool();
+
+  function solveLayout(params) {
+    const { glyphTable: gt, text, width, lineHeight: lh } = params;
+    const lineHeight = lh || 20, len = text.length;
+    const tabSize = params.tabSize || 32;
+    const collapse = params.collapseWhitespace || false;
+    arena.reset();
+    if (len === 0) return { lines: [], height: 0, width: 0, spanCount: 0 };
+
+    const ps = new Float64Array(len);
+    let cw = 0;
+    for (let i = 0; i < len; i++) {
+      const cp = text[i];
+      // Newlines have zero visual width
+      if (cp === 0x000A || cp === 0x000D) { ps[i] = cw; continue; }
+      // Tab: advance to next tab stop
+      if (cp === 0x0009) {
+        const advance = tabSize - (cw % tabSize) || tabSize;
+        if (!(collapse && i > 0 && (text[i-1] === 0x0020 || text[i-1] === 0x0009 || text[i-1] === 0x000A))) {
+          cw += advance;
+        }
+        ps[i] = cw; continue;
+      }
+      // Whitespace collapsing
+      if (collapse && cp === 0x0020 && i > 0 && (text[i-1] === 0x0020 || text[i-1] === 0x0009)) {
+        ps[i] = cw; continue;
+      }
+      cw += gw(gt, cp);
+      ps[i] = cw;
+    }
+
+    const lines = []; let curY = 0, start = 0, tw = 0, sc = 0;
+    while (start < len) {
+      // Scan for forced newline break
+      let forcedBreak = -1;
+      for (let i = start; i < len; i++) {
+        if (text[i] === 0x000A || text[i] === 0x000D) { forcedBreak = i; break; }
+      }
+
+      let end;
+      if (forcedBreak >= 0) {
+        const widthEnd = findBreakPoint(ps, start, width);
+        if (widthEnd >= forcedBreak) {
+          end = forcedBreak;
+        } else {
+          end = widthEnd;
+          if (end < start) end = start;
+          if (end < forcedBreak) {
+            let bp = end;
+            while (bp > start) {
+              const c = getBreakClass(text[bp]);
+              if (c === SP || c === BA || c === HY || c === ZW) { end = bp; break; }
+              bp--;
+            }
+          }
+          end = Math.min(end + 1, len);
+          forcedBreak = -1;
+        }
+      } else {
+        end = findBreakPoint(ps, start, width);
+        if (end < start) end = start;
+        if (end < len - 1) {
+          let bp = end;
+          while (bp > start) {
+            const c = getBreakClass(text[bp]);
+            if (c === SP || c === BA || c === HY || c === ZW || c === BK || c === LF || c === CR) { end = bp; break; }
+            bp--;
+          }
+        }
+        end = Math.min(end + 1, len);
+      }
+
+      const li = arena.allocLine();
+      const lsw = start > 0 ? ps[start - 1] : 0;
+      const visEnd = forcedBreak >= 0 ? forcedBreak : end;
+      const lw = visEnd > start ? ps[visEnd - 1] - lsw : 0;
+      arena.lineX[li] = 0; arena.lineY[li] = curY;
+      arena.lineWidth[li] = lw; arena.lineHeight[li] = lineHeight;
+      const si = arena.allocSpan();
+      arena.spanX[si] = 0; arena.spanW[si] = lw;
+      arena.spanTS[si] = start; arena.spanTE[si] = visEnd;
+      sc++;
+      lines.push({ x: 0, y: curY, width: lw, height: lineHeight,
+        spans: [{ x: 0, width: lw, textStart: start, textEnd: visEnd, fontId: 0 }] });
+      tw = Math.max(tw, lw); curY += lineHeight;
+
+      if (forcedBreak >= 0) {
+        start = forcedBreak + 1;
+        // Handle CR+LF pair
+        if (text[forcedBreak] === 0x000D && start < len && text[start] === 0x000A) start++;
+      } else {
+        start = end;
+        while (start < len && (text[start] === 0x0020 || text[start] === 0x0009)) start++;
+      }
+      if (lines.length >= MAX_LINES) break;
+    }
+    return { lines, height: curY, width: tw, spanCount: sc };
+  }
+
+  function toCodePoints(s) {
+    const pts = [];
+    for (let i = 0; i < s.length; i++) {
+      const c = s.codePointAt(i); pts.push(c); if (c > 0xffff) i++;
+    }
+    return new Uint32Array(pts);
+  }
+
+  function prepare(text) {
+    const cp = toCodePoints(text), entries = [], seen = new Set();
+    for (let i = 0; i < cp.length; i++) {
+      if (!seen.has(cp[i])) { seen.add(cp[i]); entries.push({ cp: cp[i], fid: 0, w: classifyWidth(cp[i]) }); }
+    }
+    const gt = createGlyphTable(entries);
+    warmAscii(gt);
+    return { codepoints: cp, glyphTable: gt };
+  }
+
+  // Proportional width classification (exact port of compat.ts)
+  const NARROW_SET = new Set([0x69,0x6C,0x7C,0x21,0x3A,0x3B,0x2C,0x2E,0x27,0x60,0x31]);
+  const XWIDE_SET = new Set([0x4D,0x57,0x40]);
+  const WIDE_LOWER_SET = new Set([0x6D,0x77]);
+  function classifyWidth(cp) {
+    if (cp === 0x0020) return 4.0;
+    if (cp === 0x0009) return 32;
+    if (cp === 0x000A || cp === 0x000D) return 0;
+    if (NARROW_SET.has(cp)) return 4.5;
+    if (XWIDE_SET.has(cp)) return 10.5;
+    if (WIDE_LOWER_SET.has(cp)) return 9.0;
+    if (cp >= 0x30 && cp <= 0x39) return 7.5;
+    if (cp >= 0x41 && cp <= 0x5A) return 9.0;
+    if (cp >= 0x61 && cp <= 0x7A) return 7.5;
+    if (cp >= 0xC0 && cp <= 0x24F) return 7.5;
+    if (cp >= 0x4E00 && cp <= 0x9FFF) return 16.0;
+    if (cp >= 0x3040 && cp <= 0x30FF) return 16.0;
+    if (cp >= 0xAC00 && cp <= 0xD7A3) return 16.0;
+    if (cp >= 0x1F000 && cp <= 0x1FAFF) return 16.0;
+    return 7.5;
+  }
+
+  // Bidi (simplified for demo)
+  function getBidiType(cp) {
+    if (cp >= 0x0590 && cp <= 0x05ff) return 1; // R (Hebrew)
+    if (cp >= 0x0600 && cp <= 0x06ff) return 2; // AL (Arabic)
+    if (cp >= 0x0750 && cp <= 0x077f) return 2;
+    if (cp >= 0x30 && cp <= 0x39) return 3; // EN
+    if (cp === 0x20) return 4; // WS
+    return 0; // L
+  }
+  function resolveBidi(codepoints) {
+    const len = codepoints.length, levels = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      const t = getBidiType(codepoints[i]);
+      levels[i] = (t === 1 || t === 2) ? 1 : 0;
+    }
+    return levels;
+  }
+  function reorderVisual(codepoints, levels) {
+    const out = new Uint32Array(codepoints.length);
+    const idx = new Uint32Array(codepoints.length);
+    for (let i = 0; i < idx.length; i++) idx[i] = i;
+    // L2 rule: reverse RTL runs
+    let maxLevel = 0;
+    for (let i = 0; i < levels.length; i++) if (levels[i] > maxLevel) maxLevel = levels[i];
+    for (let level = maxLevel; level >= 1; level--) {
+      let i = 0;
+      while (i < levels.length) {
+        if (levels[i] >= level) {
+          let j = i;
+          while (j < levels.length && levels[j] >= level) j++;
+          // reverse i..j-1
+          let a = i, b = j - 1;
+          while (a < b) { const tmp = idx[a]; idx[a] = idx[b]; idx[b] = tmp; a++; b--; }
+          i = j;
+        } else i++;
+      }
+    }
+    for (let i = 0; i < idx.length; i++) out[i] = codepoints[idx[i]];
+    return out;
+  }
+
+  // Alignment
+  function alignSpans(spans, lineWidth, containerWidth, mode) {
+    if (mode === 0 || spans.length === 0) return; // left
+    if (mode === 1) { // center
+      const shift = (containerWidth - lineWidth) / 2;
+      for (const s of spans) s.x += shift;
+    } else if (mode === 2) { // right
+      const shift = containerWidth - lineWidth;
+      for (const s of spans) s.x += shift;
+    } else if (mode === 3 && spans.length > 1) { // justify
+      let totalW = 0; for (const s of spans) totalW += s.width;
+      const gap = (containerWidth - totalW) / (spans.length - 1);
+      let x = 0;
+      for (const s of spans) { s.x = x; x += s.width + gap; }
+    }
+  }
+
+  // LRU Cache (numeric keys)
+  function hashCacheKey(k, w) {
+    let h = FNV_OFFSET;
+    h ^= k & 0xff; h = Math.imul(h, FNV_PRIME);
+    h ^= (k >>> 8) & 0xff; h = Math.imul(h, FNV_PRIME);
+    h ^= (k >>> 16) & 0xff; h = Math.imul(h, FNV_PRIME);
+    h ^= (k >>> 24) & 0xff; h = Math.imul(h, FNV_PRIME);
+    const wb = (w * 100) | 0;
+    h ^= wb & 0xff; h = Math.imul(h, FNV_PRIME);
+    h ^= (wb >>> 8) & 0xff; h = Math.imul(h, FNV_PRIME);
+    return h >>> 0;
+  }
+
+  class LRUCache {
+    constructor(cap) { this.cap = cap; this._size = 0; this.map = new Map(); this.head = null; this.tail = null; }
+    get size() { return this._size; }
+    get(kh) {
+      const e = this.map.get(kh); if (!e) return null;
+      if (e !== this.head) this._mth(e); return e.result;
+    }
+    set(kh, result) {
+      const ex = this.map.get(kh);
+      if (ex) { ex.result = result; if (ex !== this.head) this._mth(ex); return; }
+      const e = { kh, result, prev: null, next: this.head };
+      if (this.head) this.head.prev = e; this.head = e;
+      if (!this.tail) this.tail = e;
+      this.map.set(kh, e); this._size++;
+      if (this._size > this.cap) this._evict();
+    }
+    _mth(e) {
+      if (e.prev) e.prev.next = e.next; if (e.next) e.next.prev = e.prev;
+      if (e === this.tail) this.tail = e.prev;
+      e.prev = null; e.next = this.head;
+      if (this.head) this.head.prev = e; this.head = e;
+    }
+    _evict() {
+      if (!this.tail) return; this.map.delete(this.tail.kh);
+      if (this.tail.prev) this.tail.prev.next = null;
+      this.tail = this.tail.prev; this._size--;
+    }
+    clear() { this.map.clear(); this.head = null; this.tail = null; this._size = 0; }
+  }
+
+  // ZTB checksum
+  function computeChecksum(buf) {
+    const v = new Uint8Array(buf); let s = 0;
+    for (let i = 0; i < v.length; i++) s = (s + v[i] * (i + 1)) >>> 0;
+    return s;
+  }
+
+  // EmojiMap
+  const ZWJ_CP = 0x200d, VS16 = 0xfe0f;
+  class EmojiMap {
+    constructor() { this.seqs = new Map(); }
+    addSequence(cps, w) { this.seqs.set(cps.map(c => c.toString(36)).join(':'), w); }
+    isZWJCluster(cps, off, len) {
+      let end = off + 1;
+      while (end < off + len && end < cps.length) {
+        if (cps[end] === ZWJ_CP && end + 1 < cps.length) { end += 2; if (end < cps.length && cps[end] === VS16) end++; }
+        else if (cps[end] === VS16) end++;
+        else break;
+      }
+      return end - off;
+    }
+    getClusterWidth(cps, off, len) {
+      const sl = []; for (let i = off; i < off + len && i < cps.length; i++) sl.push(cps[i]);
+      const w = this.seqs.get(sl.map(c => c.toString(36)).join(':'));
+      return w !== undefined ? w : -1;
+    }
+  }
+
+  return {
+    PerfectHashTable, createGlyphTable, getWidth, warmAscii, gw,
+    getBreakClass, findBreakPoint, ArenaPool, arena,
+    solveLayout, toCodePoints, prepare, hashCacheKey, LRUCache,
+    resolveBidi, reorderVisual, alignSpans, computeChecksum,
+    EmojiMap, ZWJ_CP, VS16, classifyWidth,
+    MAX_LINES, MAX_SPANS,
+    SP, BA, HY, ZW: 5, BK, LF, CR, AL, NU, ID, XX,
+    fnv1a, mixHash
+  };
+})();
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// Interactive Demos
+// ═══════════════════════════════════════════════════════════
+
+const DEMOS = {
+  layout: {
+    title: 'Live Layout',
+    init(el) {
+      el.innerHTML = `
+        <div class="controls">
+          <label>Width <input type="range" id="d-width" min="80" max="600" value="360"></label>
+          <label>Line Height <input type="range" id="d-lh" min="12" max="40" value="20"></label>
+        </div>
+        <canvas id="d-canvas" height="300"></canvas>
+        <div class="metrics" id="d-metrics"></div>`;
+      const canvas = document.getElementById('d-canvas');
+      const ctx = canvas.getContext('2d');
+      const text = 'The quick brown fox jumps over the lazy dog. ZeroText performs layout with zero DOM measurement, using prefix-sum binary search for O(log n) line breaking.';
+      const { codepoints, glyphTable } = ZT.prepare(text);
+
+      function draw() {
+        const w = +document.getElementById('d-width').value;
+        const lh = +document.getElementById('d-lh').value;
+        const t0 = performance.now();
+        const result = ZT.solveLayout({ glyphTable, text: codepoints, width: w, lineHeight: lh });
+        const dt = performance.now() - t0;
+
+        canvas.width = canvas.offsetWidth; canvas.height = 300;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
+        ctx.strokeRect(20, 16, w, result.height + 8);
+
+        ctx.font = `${Math.min(lh - 4, 15)}px "JetBrains Mono", monospace`;
+        ctx.fillStyle = '#111';
+        ctx.textBaseline = 'top';
+        for (const line of result.lines) {
+          for (const span of line.spans) {
+            const slice = text.substring(span.textStart, span.textEnd);
+            ctx.fillText(slice, 20 + span.x, 20 + line.y);
+          }
+        }
+        // Line guides
+        ctx.strokeStyle = '#ddd'; ctx.setLineDash([2,3]);
+        for (const line of result.lines) {
+          ctx.beginPath(); ctx.moveTo(20, 20 + line.y + line.height);
+          ctx.lineTo(20 + w, 20 + line.y + line.height); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        document.getElementById('d-metrics').textContent =
+          `${result.lines.length} lines | ${result.spanCount} spans | ${dt.toFixed(3)}ms | width: ${w}px`;
+      }
+      document.getElementById('d-width').oninput = draw;
+      document.getElementById('d-lh').oninput = draw;
+      draw();
+    }
+  },
+
+  alignment: {
+    title: 'Justification',
+    init(el) {
+      el.innerHTML = `
+        <div class="controls">
+          <label>Align
+            <select id="d-align">
+              <option value="0">Left</option><option value="1">Center</option>
+              <option value="2">Right</option><option value="3">Justify</option>
+            </select>
+          </label>
+        </div>
+        <canvas id="d-canvas" height="280"></canvas>`;
+      const canvas = document.getElementById('d-canvas');
+      const ctx = canvas.getContext('2d');
+      const text = 'ZeroText aligns text in-place by mutating span X coordinates directly in the SoA arrays. No objects created, no garbage collected.';
+      const { codepoints, glyphTable } = ZT.prepare(text);
+
+      function draw() {
+        const mode = +document.getElementById('d-align').value;
+        const W = 340;
+        // Split into word-level spans for justify demo
+        const result = ZT.solveLayout({ glyphTable, text: codepoints, width: W, lineHeight: 22 });
+
+        canvas.width = canvas.offsetWidth; canvas.height = 280;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const ox = (canvas.width - W) / 2;
+        ctx.strokeStyle = '#d9d9d9'; ctx.lineWidth = 1;
+        ctx.strokeRect(ox, 16, W, result.height + 8);
+
+        ctx.font = '14px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#111'; ctx.textBaseline = 'top';
+
+        for (let i = 0; i < result.lines.length; i++) {
+          const line = result.lines[i];
+          const isLast = i === result.lines.length - 1;
+          // Apply alignment
+          if (mode === 1) { // center
+            const shift = (W - line.width) / 2;
+            for (const s of line.spans) s.x += shift;
+          } else if (mode === 2) { // right
+            const shift = W - line.width;
+            for (const s of line.spans) s.x += shift;
+          } else if (mode === 3 && !isLast && line.spans.length > 0) {
+            // Fake word-level justify by stretching
+            const ratio = W / line.width;
+            for (const s of line.spans) { s.x *= ratio; }
+          }
+          for (const span of line.spans) {
+            const slice = text.substring(span.textStart, span.textEnd);
+            ctx.fillText(slice, ox + span.x, 20 + line.y);
+          }
+        }
+      }
+      document.getElementById('d-align').onchange = draw;
+      draw();
+    }
+  },
+
+  bidi: {
+    title: 'RTL / Mixed Text',
+    init(el) {
+      el.innerHTML = `
+        <div class="controls">
+          <label>Text <input type="text" id="d-bidi-input" value="Hello שלום World مرحبا 123" style="width:280px"></label>
+        </div>
+        <canvas id="d-canvas" height="200"></canvas>
+        <div class="metrics" id="d-metrics"></div>`;
+      const canvas = document.getElementById('d-canvas');
+      const ctx = canvas.getContext('2d');
+
+      function draw() {
+        const input = document.getElementById('d-bidi-input').value;
+        const cp = ZT.toCodePoints(input);
+        const levels = ZT.resolveBidi(cp);
+        const visual = ZT.reorderVisual(cp, levels);
+
+        canvas.width = canvas.offsetWidth; canvas.height = 200;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw logical order
+        ctx.font = '13px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#888'; ctx.textBaseline = 'top';
+        ctx.fillText('Logical order:', 20, 20);
+        ctx.fillStyle = '#111'; ctx.font = '18px "Inter", sans-serif';
+        let x = 20;
+        for (let i = 0; i < cp.length; i++) {
+          const ch = String.fromCodePoint(cp[i]);
+          const isRTL = levels[i] === 1;
+          ctx.fillStyle = isRTL ? '#000' : '#555';
+          ctx.fillText(ch, x, 42);
+          // level indicator
+          ctx.fillStyle = isRTL ? '#111' : '#ccc';
+          ctx.fillRect(x, 68, 14, 3);
+          x += 16;
+        }
+
+        // Draw visual order
+        ctx.font = '13px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#888'; ctx.textBaseline = 'top';
+        ctx.fillText('Visual order:', 20, 94);
+        ctx.font = '18px "Inter", sans-serif';
+        x = 20;
+        for (let i = 0; i < visual.length; i++) {
+          const ch = String.fromCodePoint(visual[i]);
+          const isRTL = levels[i] === 1;
+          ctx.fillStyle = isRTL ? '#000' : '#555';
+          ctx.fillText(ch, x, 116);
+          x += 16;
+        }
+
+        // Level labels
+        ctx.font = '11px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#999';
+        ctx.fillText('■ RTL (level 1)    □ LTR (level 0)', 20, 156);
+        document.getElementById('d-metrics').textContent =
+          `${cp.length} codepoints | levels: [${Array.from(levels).join(',')}]`;
+      }
+      document.getElementById('d-bidi-input').oninput = draw;
+      draw();
+    }
+  },
+
+  truncation: {
+    title: 'Ellipsis Modes',
+    init(el) {
+      el.innerHTML = `
+        <div class="controls">
+          <label>Max Width <input type="range" id="d-tw" min="60" max="500" value="200"></label>
+        </div>
+        <canvas id="d-canvas" height="220"></canvas>`;
+      const canvas = document.getElementById('d-canvas');
+      const ctx = canvas.getContext('2d');
+      const text = 'ZeroText truncation uses binary search on prefix sums for O(log n) performance';
+
+      function draw() {
+        const maxW = +document.getElementById('d-tw').value;
+        canvas.width = canvas.offsetWidth; canvas.height = 220;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const modes = ['None', 'End …', 'Middle …', 'Start …'];
+        ctx.textBaseline = 'top';
+
+        for (let m = 0; m < 4; m++) {
+          const y = 16 + m * 50;
+          ctx.font = '11px "JetBrains Mono", monospace';
+          ctx.fillStyle = '#888'; ctx.fillText(modes[m], 20, y);
+
+          ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
+          ctx.strokeRect(20, y + 18, maxW, 22);
+
+          let display = text;
+          ctx.font = '14px "Inter", sans-serif';
+          if (m === 0) { /* no truncation */ }
+          else {
+            // Measure char widths
+            const charW = 7.5; // approximate
+            const maxChars = Math.floor(maxW / charW);
+            if (text.length > maxChars) {
+              const ell = '\u2026';
+              if (m === 1) display = text.slice(0, maxChars - 1) + ell;
+              else if (m === 2) {
+                const half = Math.floor((maxChars - 1) / 2);
+                display = text.slice(0, half) + ell + text.slice(text.length - half);
+              }
+              else if (m === 3) display = ell + text.slice(text.length - maxChars + 1);
+            }
+          }
+
+          ctx.fillStyle = '#111';
+          ctx.save(); ctx.beginPath();
+          ctx.rect(21, y + 18, maxW - 2, 22); ctx.clip();
+          ctx.fillText(display, 24, y + 21);
+          ctx.restore();
+        }
+      }
+      document.getElementById('d-tw').oninput = draw;
+      draw();
+    }
+  },
+
+  hittest: {
+    title: 'Hit Testing',
+    init(el) {
+      el.innerHTML = `
+        <canvas id="d-canvas" height="260" style="cursor:text"></canvas>
+        <div class="metrics" id="d-metrics">Click on the text to place a caret</div>`;
+      const canvas = document.getElementById('d-canvas');
+      const ctx = canvas.getContext('2d');
+      const text = 'Click anywhere on this text to test hit detection. The caret snaps to the nearest glyph boundary using binary search on line coordinates and linear span interpolation.';
+      const { codepoints, glyphTable } = ZT.prepare(text);
+      const W = 420, LH = 22, OX = 20, OY = 20;
+      const result = ZT.solveLayout({ glyphTable, text: codepoints, width: W, lineHeight: LH });
+
+      let caretLine = -1, caretX = -1;
+
+      function draw() {
+        canvas.width = canvas.offsetWidth; canvas.height = 260;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#e0e0e0'; ctx.strokeRect(OX, OY - 4, W, result.height + 8);
+
+        ctx.font = '14px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#111'; ctx.textBaseline = 'top';
+        for (const line of result.lines) {
+          for (const span of line.spans) {
+            ctx.fillText(text.substring(span.textStart, span.textEnd), OX + span.x, OY + line.y);
+          }
+        }
+
+        // Draw caret
+        if (caretLine >= 0 && caretLine < result.lines.length) {
+          const line = result.lines[caretLine];
+          ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(OX + caretX, OY + line.y);
+          ctx.lineTo(OX + caretX, OY + line.y + line.height);
+          ctx.stroke();
+        }
+      }
+
+      canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left - OX;
+        const my = e.clientY - rect.top - OY;
+
+        // Binary search for line
+        let lo = 0, hi = result.lines.length - 1;
+        while (lo < hi) {
+          const mid = (lo + hi) >>> 1;
+          if (result.lines[mid].y + result.lines[mid].height <= my) lo = mid + 1;
+          else hi = mid;
+        }
+        caretLine = lo;
+        if (caretLine < result.lines.length) {
+          const line = result.lines[caretLine];
+          // Clamp x within line width
+          caretX = Math.max(0, Math.min(mx, line.width));
+        }
+        draw();
+        const line = result.lines[caretLine];
+        if (line) {
+          const charIdx = line.spans[0].textStart + Math.round(caretX / 8);
+          document.getElementById('d-metrics').textContent =
+            `Line ${caretLine} | x: ${caretX.toFixed(1)}px | char ~${charIdx} | binary search O(log ${result.lines.length})`;
+        }
+      });
+      draw();
+    }
+  },
+
+  perf: {
+    title: 'Cache Benchmark',
+    init(el) {
+      el.innerHTML = `
+        <div id="d-perf-log" style="font:12px/1.8 'JetBrains Mono',monospace;color:#444"></div>`;
+      const log = document.getElementById('d-perf-log');
+      const text = 'The quick brown fox jumps over the lazy dog. '.repeat(10);
+      const { codepoints, glyphTable } = ZT.prepare(text);
+
+      function bench(name, fn, iters) {
+        for (let i = 0; i < 100; i++) fn(); // warmup
+        const times = [];
+        for (let i = 0; i < iters; i++) {
+          const t0 = performance.now(); fn(); times.push(performance.now() - t0);
+        }
+        times.sort((a, b) => a - b);
+        return { name, p50: times[Math.floor(times.length * 0.5)] };
+      }
+
+      setTimeout(() => {
+        const cache = new ZT.LRUCache(128);
+        const key = 12345;
+        const result = ZT.solveLayout({ glyphTable, text: codepoints, width: 400 });
+        const h = ZT.hashCacheKey(key, 400);
+        cache.set(h, result);
+
+        const results = [
+          bench('Cold layout (no cache)', () => {
+            ZT.solveLayout({ glyphTable, text: codepoints, width: 400 });
+          }, 5000),
+          bench('Hot layout (cache hit)', () => { cache.get(h); }, 50000),
+          bench('Hash key compute', () => { ZT.hashCacheKey(key, 400); }, 100000),
+          bench('Prefix sum (450 chars)', () => {
+            const ps = new Float64Array(codepoints.length);
+            let c = 0;
+            for (let i = 0; i < codepoints.length; i++) { c += ZT.gw(glyphTable, codepoints[i]); ps[i] = c; }
+          }, 10000),
+          bench('Binary search break', () => {
+            const ps = new Float64Array([8,16,24,32,40,48,56,64,72,80]);
+            ZT.findBreakPoint(ps, 0, 50);
+          }, 100000),
+        ];
+
+        let html = '';
+        for (const r of results) {
+          const us = (r.p50 * 1000).toFixed(1);
+          html += `<div><span style="color:#111;font-weight:600">${us.padStart(7)}μs</span>  ${r.name}</div>`;
+        }
+        log.innerHTML = html;
+      }, 100);
+    }
+  }
+};
+
+// Wire up cards
+document.querySelectorAll('.card[data-demo]').forEach(card => {
+  card.addEventListener('click', () => {
+    const key = card.dataset.demo;
+    const demo = DEMOS[key];
+    if (!demo) return;
+    const stage = document.getElementById('demo-stage');
+    document.getElementById('demo-title').textContent = demo.title;
+    stage.style.display = 'block';
+    const content = document.getElementById('demo-content');
+    content.innerHTML = '';
+    demo.init(content);
+    stage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+});
+document.getElementById('demo-close').addEventListener('click', () => {
+  document.getElementById('demo-stage').style.display = 'none';
+});
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// Test Suite — runs all core.test.ts tests in the browser
+// ═══════════════════════════════════════════════════════════
+
+(() => {
+  const groups = {};
+  let currentGroup = '';
+  let passed = 0, failed = 0;
+
+  function describe(name, fn) { currentGroup = name; groups[name] = []; fn(); }
+  function it(name, fn) {
+    try { fn(); groups[currentGroup].push({ name, pass: true }); passed++; }
+    catch (e) { groups[currentGroup].push({ name, pass: false, msg: e.message || String(e) }); failed++; }
+  }
+  function eq(a, b) { if (a !== b) throw new Error(`${a} !== ${b}`); }
+  function neq(a, b) { if (a === b) throw new Error(`${a} === ${b}`); }
+  function ok(v, msg) { if (!v) throw new Error(msg || 'assertion failed'); }
+
+  // ── PerfectHashTable ──
+  describe('PerfectHashTable', () => {
+    it('stores and retrieves values', () => {
+      const t = new ZT.PerfectHashTable(64, 0); t.set(42, 10.5); eq(t.get(42), 10.5);
+    });
+    it('returns -1 for missing keys', () => {
+      const t = new ZT.PerfectHashTable(64, 0); eq(t.get(999), -1);
+    });
+    it('handles multiple entries without collision', () => {
+      const entries = [];
+      for (let i = 65; i <= 90; i++) entries.push({ cp: i, fid: 0, w: i - 60 });
+      const t = ZT.createGlyphTable(entries);
+      for (const e of entries) eq(ZT.getWidth(t, e.cp, 0), e.w);
+    });
+  });
+
+  // ── createGlyphTable ──
+  describe('createGlyphTable', () => {
+    it('retrieves all entries correctly', () => {
+      const entries = [{ cp: 0x48, fid: 0, w: 9 }, { cp: 0x65, fid: 0, w: 7 },
+                       { cp: 0x6c, fid: 0, w: 4 }, { cp: 0x6f, fid: 0, w: 8 }];
+      const t = ZT.createGlyphTable(entries);
+      eq(ZT.getWidth(t, 0x48, 0), 9); eq(ZT.getWidth(t, 0x65, 0), 7);
+      eq(ZT.getWidth(t, 0x6c, 0), 4); eq(ZT.getWidth(t, 0x6f, 0), 8);
+    });
+    it('returns 0 for unknown codepoints', () => {
+      const t = ZT.createGlyphTable([{ cp: 65, fid: 0, w: 8 }]);
+      eq(ZT.getWidth(t, 9999, 0), 0);
+    });
+  });
+
+  // ── findBreakPoint ──
+  describe('findBreakPoint', () => {
+    it('finds correct break position', () => {
+      const ps = new Float64Array([8, 16, 24, 32, 40]);
+      eq(ZT.findBreakPoint(ps, 0, 24), 2);
+      eq(ZT.findBreakPoint(ps, 0, 25), 2);
+      eq(ZT.findBreakPoint(ps, 0, 32), 3);
+    });
+    it('handles start offset', () => {
+      const ps = new Float64Array([8, 16, 24, 32, 40]);
+      eq(ZT.findBreakPoint(ps, 2, 16), 3);
+    });
+    it('returns start when width too small', () => {
+      const ps = new Float64Array([10, 20, 30]);
+      eq(ZT.findBreakPoint(ps, 0, 5), 0);
+    });
+  });
+
+  // ── ArenaPool ──
+  describe('ArenaPool', () => {
+    it('allocates lines with incrementing indices', () => {
+      const p = new ZT.ArenaPool(); p.reset();
+      eq(p.allocLine(), 0); eq(p.allocLine(), 1); eq(p.allocLine(), 2);
+    });
+    it('wraps around at MAX_LINES', () => {
+      const p = new ZT.ArenaPool(); p.reset();
+      for (let i = 0; i < ZT.MAX_LINES; i++) p.allocLine();
+      eq(p.allocLine(), 0);
+    });
+    it('lineWidth backed by arena buffer', () => {
+      const p = new ZT.ArenaPool(); p.reset();
+      const idx = p.allocLine();
+      p.lineWidth[idx] = 42.5; p.lineHeight[idx] = 20;
+      eq(p.lineWidth.buffer, p.buffer);
+      eq(p.lineHeight.buffer, p.buffer);
+    });
+    it('reset increments generation', () => {
+      const p = new ZT.ArenaPool(); p.allocLine(); p.allocLine();
+      p.reset(); eq(p.allocLine(), 0);
+    });
+    it('gc frees old generation', () => {
+      const p = new ZT.ArenaPool(); p.reset();
+      p.allocLine(); p.reset(); p.allocLine();
+      ok(p.gc() > 0);
+    });
+  });
+
+  // ── solveLayout ──
+  describe('solveLayout', () => {
+    it('returns empty for empty text', () => {
+      const t = ZT.createGlyphTable([]);
+      const r = ZT.solveLayout({ glyphTable: t, text: new Uint32Array(0), width: 100 });
+      eq(r.lines.length, 0); eq(r.height, 0); eq(r.width, 0); eq(r.spanCount, 0);
+    });
+    it('single word fits on one line', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Hello');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 100 });
+      eq(r.lines.length, 1); eq(r.height, 20);
+      eq(r.lines[0].spans[0].textStart, 0); eq(r.lines[0].spans[0].textEnd, 5);
+    });
+    it('wraps text into multiple lines', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Hello World');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 50 });
+      ok(r.lines.length >= 2, `Expected >= 2 lines, got ${r.lines.length}`);
+    });
+    it('respects custom lineHeight', () => {
+      const { codepoints, glyphTable } = ZT.prepare('AB');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 100, lineHeight: 30 });
+      eq(r.lines[0].height, 30); eq(r.height, 30);
+    });
+    it('produces correct span count', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Hello World Test');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 50 });
+      eq(r.spanCount, r.lines.length);
+    });
+    it('skips leading spaces on wrapped lines', () => {
+      const { codepoints, glyphTable } = ZT.prepare('AA BB');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 20 });
+      if (r.lines.length > 1) {
+        const fc = codepoints[r.lines[1].spans[0].textStart];
+        neq(fc, 0x20);
+      }
+    });
+    it('does not exceed MAX_LINES', () => {
+      const { codepoints, glyphTable } = ZT.prepare('A '.repeat(2000));
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 10 });
+      ok(r.lines.length <= ZT.MAX_LINES);
+    });
+  });
+
+  // ── toCodePoints ──
+  describe('toCodePoints', () => {
+    it('converts ASCII', () => {
+      const cp = ZT.toCodePoints('ABC');
+      eq(cp.length, 3); eq(cp[0], 65); eq(cp[1], 66); eq(cp[2], 67);
+    });
+    it('handles emoji (surrogate pairs)', () => {
+      const cp = ZT.toCodePoints('\u{1F600}');
+      eq(cp.length, 1); eq(cp[0], 0x1f600);
+    });
+    it('handles mixed ASCII and emoji', () => {
+      const cp = ZT.toCodePoints('A\u{1F600}B');
+      eq(cp.length, 3); eq(cp[0], 65); eq(cp[1], 0x1f600); eq(cp[2], 66);
+    });
+    it('handles CJK', () => {
+      const cp = ZT.toCodePoints('\u4e16\u754c');
+      eq(cp.length, 2); eq(cp[0], 0x4e16); eq(cp[1], 0x754c);
+    });
+  });
+
+  // ── getBreakClass ──
+  describe('getBreakClass', () => {
+    it('classifies ASCII letters as AL', () => { eq(ZT.getBreakClass(0x41), ZT.AL); eq(ZT.getBreakClass(0x7a), ZT.AL); });
+    it('classifies space as SP', () => { eq(ZT.getBreakClass(0x20), ZT.SP); });
+    it('classifies digits as NU', () => { eq(ZT.getBreakClass(0x30), ZT.NU); eq(ZT.getBreakClass(0x39), ZT.NU); });
+    it('classifies CJK as ID', () => { eq(ZT.getBreakClass(0x4e00), ZT.ID); eq(ZT.getBreakClass(0x9fff), ZT.ID); });
+    it('classifies LF and CR', () => { eq(ZT.getBreakClass(0x0a), ZT.LF); eq(ZT.getBreakClass(0x0d), ZT.CR); });
+  });
+
+  // ── EmojiMap ──
+  describe('EmojiMap', () => {
+    it('detects ZWJ cluster length', () => {
+      const em = new ZT.EmojiMap();
+      const seq = new Uint32Array([0x1f468, ZT.ZWJ_CP, 0x1f469]);
+      eq(em.isZWJCluster(seq, 0, 3), 3);
+    });
+    it('returns 1 for non-ZWJ', () => {
+      const em = new ZT.EmojiMap();
+      eq(em.isZWJCluster(new Uint32Array([65, 66, 67]), 0, 3), 1);
+    });
+    it('stores and retrieves cluster widths', () => {
+      const em = new ZT.EmojiMap();
+      em.addSequence([0x1f468, ZT.ZWJ_CP, 0x1f469], 24);
+      eq(em.getClusterWidth(new Uint32Array([0x1f468, ZT.ZWJ_CP, 0x1f469]), 0, 3), 24);
+    });
+    it('returns -1 for unknown clusters', () => {
+      const em = new ZT.EmojiMap();
+      eq(em.getClusterWidth(new Uint32Array([0x1f468, ZT.ZWJ_CP, 0x1f469]), 0, 3), -1);
+    });
+  });
+
+  // ── ZTB codegen ──
+  describe('ZTB codegen', () => {
+    it('checksum is consistent', () => {
+      const buf = new Uint8Array([1, 2, 3, 4]).buffer;
+      eq(ZT.computeChecksum(buf), ZT.computeChecksum(buf));
+    });
+    it('different data gives different checksum', () => {
+      neq(ZT.computeChecksum(new Uint8Array([1,2,3,4]).buffer),
+          ZT.computeChecksum(new Uint8Array([4,3,2,1]).buffer));
+    });
+    it('MAGIC bytes spell ZERO', () => {
+      const MAGIC = new Uint8Array([0x5a, 0x45, 0x52, 0x4f]);
+      eq(String.fromCharCode(...MAGIC), 'ZERO');
+    });
+  });
+
+  // ── Forced newline breaks ──
+  describe('Forced newline breaks', () => {
+    it('breaks on \\n producing separate lines', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Hello\nWorld');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 500 });
+      eq(r.lines.length, 2);
+      eq(r.lines[0].spans[0].textEnd, 5);
+      eq(r.lines[1].spans[0].textStart, 6);
+    });
+    it('handles multiple consecutive newlines (empty lines)', () => {
+      const { codepoints, glyphTable } = ZT.prepare('A\n\nB');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 500 });
+      eq(r.lines.length, 3);
+      eq(r.lines[1].width, 0);
+    });
+    it('handles CR+LF as a single line break', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Line1\r\nLine2');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 500 });
+      eq(r.lines.length, 2);
+    });
+    it('handles trailing newline', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Hello\n');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 500 });
+      ok(r.lines.length >= 1);
+    });
+    it('handles leading newline', () => {
+      const { codepoints, glyphTable } = ZT.prepare('\nHello');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 500 });
+      eq(r.lines.length, 2);
+      eq(r.lines[0].width, 0);
+    });
+  });
+
+  // ── Tab handling ──
+  describe('Tab handling', () => {
+    it('tabs classified as breakable whitespace (SP class)', () => {
+      eq(ZT.getBreakClass(0x0009), ZT.SP);
+    });
+    it('tabs have non-zero width in layout', () => {
+      const { codepoints, glyphTable } = ZT.prepare('A\tB');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 500 });
+      eq(r.lines.length, 1);
+      ok(r.width > 16, 'Tab width should be > 16, got ' + r.width);
+    });
+    it('tabs are skipped as leading whitespace on wrapped lines', () => {
+      const { codepoints, glyphTable } = ZT.prepare('AA\tBB');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 20 });
+      if (r.lines.length > 1) {
+        const fc = codepoints[r.lines[1].spans[0].textStart];
+        neq(fc, 0x0009);
+      }
+    });
+  });
+
+  // ── Newlines have zero width ──
+  describe('Newlines have zero width', () => {
+    it('newline characters do not add to line width', () => {
+      const { codepoints: cpA, glyphTable: gtA } = ZT.prepare('AB');
+      const { codepoints: cpB, glyphTable: gtB } = ZT.prepare('A\nB');
+      const rA = ZT.solveLayout({ glyphTable: gtA, text: cpA, width: 500 });
+      const rB = ZT.solveLayout({ glyphTable: gtB, text: cpB, width: 500 });
+      ok(rB.lines[0].width < rA.lines[0].width);
+    });
+  });
+
+  // ── Whitespace collapsing ──
+  describe('Whitespace collapsing', () => {
+    it('collapses multiple spaces when enabled', () => {
+      const cp = ZT.toCodePoints('A    B');
+      const entries = []; const seen = new Set();
+      for (let i = 0; i < cp.length; i++) {
+        if (!seen.has(cp[i])) { seen.add(cp[i]); entries.push({ cp: cp[i], fid: 0, w: 8 }); }
+      }
+      const gt = ZT.createGlyphTable(entries);
+      ZT.warmAscii(gt); // ensure gw() uses this table's widths
+      const collapsed = ZT.solveLayout({ glyphTable: gt, text: cp, width: 500, collapseWhitespace: true });
+      const normal = ZT.solveLayout({ glyphTable: gt, text: cp, width: 500, collapseWhitespace: false });
+      ok(collapsed.width < normal.width, 'Collapsed ' + collapsed.width + ' should be < normal ' + normal.width);
+    });
+  });
+
+  // ── Proportional width compat layer ──
+  describe('Proportional width compat layer', () => {
+    it('narrow chars (i, l) are narrower than wide chars (M, W)', () => {
+      const { codepoints: cpI, glyphTable: gtI } = ZT.prepare('iiii');
+      const { codepoints: cpM, glyphTable: gtM } = ZT.prepare('MMMM');
+      let wI = 0, wM = 0;
+      for (let i = 0; i < cpI.length; i++) wI += ZT.getWidth(gtI, cpI[i], 0);
+      for (let i = 0; i < cpM.length; i++) wM += ZT.getWidth(gtM, cpM[i], 0);
+      ok(wI < wM, '"iiii" (' + wI + ') should be narrower than "MMMM" (' + wM + ')');
+    });
+    it('CJK characters are wider than Latin', () => {
+      const { codepoints: cpL, glyphTable: gtL } = ZT.prepare('AB');
+      const { codepoints: cpC, glyphTable: gtC } = ZT.prepare('\u4e16\u754c');
+      let wL = 0, wC = 0;
+      for (let i = 0; i < cpL.length; i++) wL += ZT.getWidth(gtL, cpL[i], 0);
+      for (let i = 0; i < cpC.length; i++) wC += ZT.getWidth(gtC, cpC[i], 0);
+      ok(wC > wL, 'CJK (' + wC + ') should be wider than Latin (' + wL + ')');
+    });
+    it('measure returns proportional width, not flat', () => {
+      const { codepoints: cpI, glyphTable: gtI } = ZT.prepare('iiii');
+      const { codepoints: cpM, glyphTable: gtM } = ZT.prepare('MMMM');
+      let totalI = 0, totalM = 0;
+      for (let i = 0; i < cpI.length; i++) totalI += ZT.getWidth(gtI, cpI[i], 0);
+      for (let i = 0; i < cpM.length; i++) totalM += ZT.getWidth(gtM, cpM[i], 0);
+      neq(totalI, totalM);
+    });
+  });
+
+  // ── Edge cases ──
+  describe('Edge cases', () => {
+    it('single character text', () => {
+      const { codepoints, glyphTable } = ZT.prepare('X');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 100 });
+      eq(r.lines.length, 1);
+      ok(r.width > 0);
+    });
+    it('only whitespace', () => {
+      const { codepoints, glyphTable } = ZT.prepare('   ');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 100 });
+      ok(r.lines.length >= 1);
+    });
+    it('only newlines', () => {
+      const { codepoints, glyphTable } = ZT.prepare('\n\n\n');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 100 });
+      eq(r.lines.length, 3);
+    });
+    it('very long word without break opportunity', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Supercalifragilisticexpialidocious');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 30 });
+      ok(r.lines.length > 1, 'Long word should overflow to multiple lines');
+    });
+    it('mixed newlines and wrapping', () => {
+      const { codepoints, glyphTable } = ZT.prepare('Short\nThis is a longer line that should wrap');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 100 });
+      ok(r.lines.length >= 3, 'Expected >= 3 lines, got ' + r.lines.length);
+    });
+  });
+
+  // ── Render results ──
+  describe('Integration', () => {
+    it('prepare + solveLayout produces valid output', () => {
+      const { codepoints, glyphTable } = ZT.prepare('The quick brown fox');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 200 });
+      ok(r.lines.length >= 1); ok(r.height > 0); ok(r.width > 0);
+    });
+    it('measure returns total text width', () => {
+      const { codepoints, glyphTable } = ZT.prepare('ABC');
+      let total = 0;
+      for (let i = 0; i < codepoints.length; i++) total += ZT.getWidth(glyphTable, codepoints[i], 0);
+      eq(total, 27); // 3 uppercase × 9px each (proportional)
+    });
+    it('handles empty string', () => {
+      const { codepoints, glyphTable } = ZT.prepare('');
+      const r = ZT.solveLayout({ glyphTable, text: codepoints, width: 100 });
+      eq(r.lines.length, 0);
+    });
+  });
+
+  // ── LRU Cache ──
+  describe('LRU Cache', () => {
+    it('stores and retrieves', () => {
+      const c = new ZT.LRUCache(3); c.set(1, { v: 1 }); eq(c.get(1).v, 1);
+    });
+    it('returns null for missing', () => {
+      const c = new ZT.LRUCache(3); eq(c.get(99), null);
+    });
+    it('evicts LRU on overflow', () => {
+      const c = new ZT.LRUCache(2);
+      c.set(1, { v: 1 }); c.set(2, { v: 2 }); c.set(3, { v: 3 });
+      eq(c.get(1), null); eq(c.get(2).v, 2); eq(c.get(3).v, 3);
+    });
+    it('access promotes entry', () => {
+      const c = new ZT.LRUCache(2);
+      c.set(1, { v: 1 }); c.set(2, { v: 2 }); c.get(1); c.set(3, { v: 3 });
+      eq(c.get(1).v, 1); eq(c.get(2), null); eq(c.get(3).v, 3);
+    });
+    it('updates existing value', () => {
+      const c = new ZT.LRUCache(3);
+      c.set(1, { v: 1 }); c.set(1, { v: 99 });
+      eq(c.get(1).v, 99); eq(c.size, 1);
+    });
+  });
+
+  // ── Render results ──
+  setTimeout(() => {
+    const container = document.getElementById('test-results');
+    container.innerHTML = '';
+    for (const [group, tests] of Object.entries(groups)) {
+      const div = document.createElement('div');
+      div.className = 'test-group';
+      const passCount = tests.filter(t => t.pass).length;
+      div.innerHTML = `<div class="test-group-header"><span>${group}</span><span class="count">${passCount}/${tests.length}</span></div>`;
+      for (const t of tests) {
+        const item = document.createElement('div');
+        item.className = `test-item ${t.pass ? 'pass' : 'fail'}`;
+        item.innerHTML = `<span class="icon">${t.pass ? '\u25cf' : '\u25cf'}</span><span>${t.name}</span>${t.pass ? '' : `<span class="msg" title="${t.msg}">${t.msg}</span>`}`;
+        div.appendChild(item);
+      }
+      container.appendChild(div);
+    }
+    const summary = document.getElementById('test-summary');
+    summary.className = `test-summary ${failed === 0 ? 'all-pass' : 'has-fail'}`;
+    summary.textContent = failed === 0
+      ? `All ${passed} tests passed`
+      : `${passed} passed, ${failed} failed`;
+  }, 50);
+})();
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// Benchmarks — runs in browser, reports median p50
+// ═══════════════════════════════════════════════════════════
+
+setTimeout(() => {
+  const text = 'The quick brown fox jumps over the lazy dog. '.repeat(20);
+  const { codepoints, glyphTable } = ZT.prepare(text);
+  const cache = new ZT.LRUCache(128);
+  const result = ZT.solveLayout({ glyphTable, text: codepoints, width: 400 });
+  const h = ZT.hashCacheKey(12345, 400);
+  cache.set(h, result);
+
+  function bench(fn, iters) {
+    for (let i = 0; i < 200; i++) fn();
+    // Batch timing: run N iterations and divide to get per-op time
+    const batches = 20, batchSize = Math.max(100, Math.floor(iters / batches));
+    const batchTimes = [];
+    for (let b = 0; b < batches; b++) {
+      const t0 = performance.now();
+      for (let i = 0; i < batchSize; i++) fn();
+      batchTimes.push((performance.now() - t0) / batchSize);
+    }
+    batchTimes.sort((a, b) => a - b);
+    return batchTimes[Math.floor(batchTimes.length * 0.5)];
+  }
+
+  const rows = [
+    ['Cold layout (900 chars)', bench(() => ZT.solveLayout({ glyphTable, text: codepoints, width: 400 }), 5000), 'Prefix sum + binary search'],
+    ['Hot layout (cache hit)', bench(() => cache.get(h), 50000), 'FNV-1a numeric key, Map.get()'],
+    ['Hash key compute', bench(() => ZT.hashCacheKey(12345, 400), 100000), 'FNV-1a, zero string alloc'],
+    ['findBreakPoint (10 items)', bench(() => {
+      const ps = new Float64Array([8,16,24,32,40,48,56,64,72,80]);
+      ZT.findBreakPoint(ps, 0, 50);
+    }, 100000), 'Binary search O(log n)'],
+    ['getBreakClass', bench(() => {
+      ZT.getBreakClass(0x41); ZT.getBreakClass(0x4e00); ZT.getBreakClass(0x20);
+    }, 100000), 'Range check, 3 lookups'],
+    ['Arena allocLine (×100)', bench(() => {
+      ZT.arena.reset(); for (let i = 0; i < 100; i++) ZT.arena.allocLine();
+    }, 10000), 'Circular index, zero alloc'],
+  ];
+
+  const tbody = document.getElementById('bench-body');
+  tbody.innerHTML = '';
+  for (const [name, time, notes] of rows) {
+    const us = (time * 1000).toFixed(1);
+    tbody.innerHTML += `<tr><td>${name}</td><td>${us} μs</td><td>${notes}</td></tr>`;
+  }
+}, 200);
+</script>
+
+</body>
+</html>

@@ -9,10 +9,7 @@ import { DecorationSpec, setDecoration, clearDecorations } from "./decoration.js
 import { WritingMode, rotateLayout } from "./vertical.js";
 import { hitTest as htHitTest, getSelectionRects as htGetSelectionRects, CaretPosition, SelectionRange, SelectionRect } from "./hittest.js";
 import { FontEntry, buildFallbackChain, resolveFontIds, _fontIds } from "./fontfallback.js";
-<<<<<<< HEAD
-=======
 import { toCodePoints, layoutText as compatLayoutText, TextOptions, LayoutMetrics } from "./compat.js";
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 
 export interface EngineConfig {
   config?: Record<string, unknown>;
@@ -220,8 +217,6 @@ export class ZeroEngine {
   }
 
   /**
-<<<<<<< HEAD
-=======
    * High-level API: lay out a plain string with proportional width estimation.
    * No glyph table setup required — just pass text, width, and optional config.
    *
@@ -233,7 +228,6 @@ export class ZeroEngine {
   }
 
   /**
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
    * Advanced layout pipeline applying all configured features in correct order.
    * Returns a fully processed LayoutResult.
    */

@@ -2,12 +2,8 @@ export { solveLayout, solveLayoutCompact, materializeResult, packChar, unpackX, 
 export type { LayoutParams, LayoutResult, CompactLayoutResult, Line, Span, Constraint, EditOp } from "./layout.js";
 export { createEngine, ZeroEngine } from "./engine.js";
 export type { EngineConfig, PreparedText } from "./engine.js";
-<<<<<<< HEAD
-export { measure } from "./compat.js";
-=======
 export { measure, layoutText, prepare, layout, toCodePoints } from "./compat.js";
 export type { TextOptions, LayoutMetrics } from "./compat.js";
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 export { ArenaPool } from "./memory.js";
 export { MAX_LINES, MAX_PREFIX_LEN } from "./memory.js";
 export { PerfectHashTable, createGlyphTable, getWidth, EmojiMap } from "./hash.js";

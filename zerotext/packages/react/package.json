@@ -1,0 +1,13 @@
+{
+  "name": "@zerotext/react",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@zerotext/flow",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "sideEffects": false,
+  "license": "Apache-2.0"
+}

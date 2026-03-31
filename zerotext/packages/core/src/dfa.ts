@@ -70,10 +70,7 @@ export function buildDFA(): Uint8Array {
 export function getBreakClass(codepoint: number): BreakClass {
   if (codepoint === 0x000a) return BreakClass.LF;
   if (codepoint === 0x000d) return BreakClass.CR;
-<<<<<<< HEAD
-=======
   if (codepoint === 0x0009) return BreakClass.SP; // TAB treated as breakable whitespace
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   if (codepoint === 0x000b || codepoint === 0x000c || codepoint === 0x2028 || codepoint === 0x2029) return BreakClass.BK;
   if (codepoint === 0x0020) return BreakClass.SP;
   if (codepoint === 0x200b) return BreakClass.ZW;

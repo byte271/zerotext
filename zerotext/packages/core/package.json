@@ -1,0 +1,20 @@
+{
+  "name": "@zerotext/core",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./compat": {
+      "import": "./dist/compat.mjs",
+      "types": "./dist/compat.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "license": "Apache-2.0"
+}

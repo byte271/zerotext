@@ -38,11 +38,8 @@ export interface LayoutParams {
   width: number;
   lineHeight?: number;
   constraints?: Constraint[];
-<<<<<<< HEAD
-=======
   tabSize?: number;          // tab stop width in px (default: 32)
   collapseWhitespace?: boolean; // collapse runs of whitespace to single space width (default: false)
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 }
 
 export interface LayoutResult {
@@ -128,11 +125,8 @@ function getPrefixSum(len: number): Float64Array {
 export function solveLayoutCompact(params: LayoutParams): CompactLayoutResult {
   const { glyphTable, text, width, lineHeight: lh, constraints } = params;
   const lineHeight = lh ?? 20;
-<<<<<<< HEAD
-=======
   const tabSize = params.tabSize ?? 32;
   const collapse = params.collapseWhitespace ?? false;
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   const len = text.length;
 
   sharedArena.reset();
@@ -146,8 +140,6 @@ export function solveLayoutCompact(params: LayoutParams): CompactLayoutResult {
   let cumWidth = 0;
   for (let i = 0; i < len; i++) {
     const cp = text[i];
-<<<<<<< HEAD
-=======
     // Newlines have zero visual width
     if (cp === 0x000A || cp === 0x000D) {
       prefixSum[i] = cumWidth;
@@ -167,7 +159,6 @@ export function solveLayoutCompact(params: LayoutParams): CompactLayoutResult {
       prefixSum[i] = cumWidth;
       continue;
     }
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     // Fast path: ASCII/Latin codepoints can't start emoji clusters
     if (cp < 0x200D) {
       cumWidth += getWidth(glyphTable, cp, 0);
@@ -208,51 +199,6 @@ export function solveLayoutCompact(params: LayoutParams): CompactLayoutResult {
       }
     }
 
-<<<<<<< HEAD
-    let end = findBreakPoint(prefixSum, start, availWidth);
-
-    if (end < start) {
-      end = start;
-    }
-
-    if (end < len - 1) {
-      let breakPos = end;
-      let brokeAtSoftHyphen = false;
-      while (breakPos > start) {
-        const cp = text[breakPos];
-        if (cp === 0x00AD) { // SOFT_HYPHEN
-          end = breakPos;
-          brokeAtSoftHyphen = true;
-          break;
-        }
-        const cls = getBreakClass(cp);
-        if (
-          cls === BreakClass.SP ||
-          cls === BreakClass.BA ||
-          cls === BreakClass.HY ||
-          cls === BreakClass.ZW ||
-          cls === BreakClass.BK ||
-          cls === BreakClass.LF ||
-          cls === BreakClass.CR
-        ) {
-          end = breakPos;
-          break;
-        }
-        breakPos--;
-      }
-    }
-
-    end = Math.min(end + 1, len);
-
-    // Write line data into arena SoA arrays (zero allocation)
-    const lineIdx = sharedArena.allocLine();
-    const lineStartWidth = start > 0 ? prefixSum[start - 1] : 0;
-    // When breaking at a soft hyphen, account for the visible hyphen width
-    const softHyphenExtra = (end < len && end > 0 && text[end - 1] === 0x00AD)
-      ? getWidth(glyphTable, 0x002D /* HYPHEN-MINUS */, 0)
-      : 0;
-    const lineW = prefixSum[end - 1] - lineStartWidth + softHyphenExtra;
-=======
     // ── Forced line break: scan for \n or \r before doing width-based breaking ──
     let forcedBreak = -1;
     for (let i = start; i < len; i++) {
@@ -329,26 +275,17 @@ export function solveLayoutCompact(params: LayoutParams): CompactLayoutResult {
     const lineW = visEnd > start
       ? prefixSum[visEnd - 1] - lineStartWidth + softHyphenExtra
       : 0;
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 
     sharedArena.lineX[lineIdx] = 0;
     sharedArena.lineY[lineIdx] = cursorY;
     sharedArena.lineWidth[lineIdx] = lineW;
     sharedArena.lineHeight[lineIdx] = lineHeight;
 
-<<<<<<< HEAD
-    // Write span data into arena SoA arrays (zero allocation)
-=======
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     const spanIdx = sharedArena.allocSpan();
     sharedArena.spanX[spanIdx] = 0;
     sharedArena.spanWidth[spanIdx] = lineW;
     sharedArena.spanTextStart[spanIdx] = start;
-<<<<<<< HEAD
-    sharedArena.spanTextEnd[spanIdx] = end;
-=======
     sharedArena.spanTextEnd[spanIdx] = forcedBreak >= 0 ? forcedBreak : end;
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     sharedArena.spanFontId[spanIdx] = 0;
 
     sharedArena.lineSpanStart[lineIdx] = spanIdx;
@@ -358,12 +295,6 @@ export function solveLayoutCompact(params: LayoutParams): CompactLayoutResult {
     spanCount++;
     totalWidth = Math.max(totalWidth, lineW);
     cursorY += lineHeight;
-<<<<<<< HEAD
-    start = end;
-
-    while (start < len && text[start] === 0x0020) {
-      start++;
-=======
 
     if (forcedBreak >= 0) {
       // Advance past the newline character(s)
@@ -378,7 +309,6 @@ export function solveLayoutCompact(params: LayoutParams): CompactLayoutResult {
       while (start < len && (text[start] === 0x0020 || text[start] === 0x0009)) {
         start++;
       }
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     }
 
     if (lineCount >= MAX_LINES) break;

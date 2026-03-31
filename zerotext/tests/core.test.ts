@@ -108,10 +108,7 @@ const enum BreakClass {
 function getBreakClass(cp: number): number {
   if (cp === 0x000a) return BreakClass.LF;
   if (cp === 0x000d) return BreakClass.CR;
-<<<<<<< HEAD
-=======
   if (cp === 0x0009) return BreakClass.SP; // TAB
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   if (cp === 0x0020) return BreakClass.SP;
   if (cp === 0x200b) return BreakClass.ZW;
   if (cp >= 0x0030 && cp <= 0x0039) return BreakClass.NU;
@@ -221,22 +218,15 @@ class ArenaPool {
 interface Span { x: number; width: number; textStart: number; textEnd: number; fontId: number; }
 interface Line { x: number; y: number; width: number; height: number; spans: Span[]; }
 interface LayoutResult { lines: Line[]; height: number; width: number; spanCount: number; }
-<<<<<<< HEAD
-interface LayoutParams { glyphTable: PerfectHashTable; text: Uint32Array; width: number; lineHeight?: number; }
-=======
 interface LayoutParams { glyphTable: PerfectHashTable; text: Uint32Array; width: number; lineHeight?: number; tabSize?: number; collapseWhitespace?: boolean; }
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 
 const sharedArena = new ArenaPool();
 
 function solveLayout(params: LayoutParams): LayoutResult {
   const { glyphTable, text, width, lineHeight: lh } = params;
   const lineHeight = lh ?? 20;
-<<<<<<< HEAD
-=======
   const tabSize = params.tabSize ?? 32;
   const collapse = params.collapseWhitespace ?? false;
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   const len = text.length;
   sharedArena.reset();
   if (len === 0) return { lines: [], height: 0, width: 0, spanCount: 0 };
@@ -244,9 +234,6 @@ function solveLayout(params: LayoutParams): LayoutResult {
   const prefixSum = new Float64Array(len);
   let cumWidth = 0;
   for (let i = 0; i < len; i++) {
-<<<<<<< HEAD
-    cumWidth += getWidth(glyphTable, text[i], 0);
-=======
     const cp = text[i];
     if (cp === 0x000A || cp === 0x000D) {
       prefixSum[i] = cumWidth;
@@ -265,7 +252,6 @@ function solveLayout(params: LayoutParams): LayoutResult {
       continue;
     }
     cumWidth += getWidth(glyphTable, cp, 0);
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     prefixSum[i] = cumWidth;
   }
 
@@ -276,28 +262,6 @@ function solveLayout(params: LayoutParams): LayoutResult {
   let spanCount = 0;
 
   while (start < len) {
-<<<<<<< HEAD
-    let end = findBreakPoint(prefixSum, start, width);
-    if (end < start) end = start;
-
-    if (end < len - 1) {
-      let breakPos = end;
-      while (breakPos > start) {
-        const cls = getBreakClass(text[breakPos]);
-        if (cls === BreakClass.SP || cls === BreakClass.BA || cls === BreakClass.HY ||
-            cls === BreakClass.ZW || cls === BreakClass.BK || cls === BreakClass.LF || cls === BreakClass.CR) {
-          end = breakPos;
-          break;
-        }
-        breakPos--;
-      }
-    }
-
-    end = Math.min(end + 1, len);
-    const lineIdx = sharedArena.allocLine();
-    const lineStartWidth = start > 0 ? prefixSum[start - 1] : 0;
-    const lineW = prefixSum[end - 1] - lineStartWidth;
-=======
     // Scan for forced newline break
     let forcedBreak = -1;
     for (let i = start; i < len; i++) {
@@ -351,32 +315,19 @@ function solveLayout(params: LayoutParams): LayoutResult {
     const lineStartWidth = start > 0 ? prefixSum[start - 1] : 0;
     const visEnd = forcedBreak >= 0 ? forcedBreak : end;
     const lineW = visEnd > start ? prefixSum[visEnd - 1] - lineStartWidth : 0;
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 
     sharedArena.lineX[lineIdx] = 0;
     sharedArena.lineY[lineIdx] = cursorY;
     sharedArena.lineWidth[lineIdx] = lineW;
     sharedArena.lineHeight[lineIdx] = lineHeight;
-<<<<<<< HEAD
-
-    sharedArena.allocSpan();
-    spanCount++;
-
-    const span: Span = { x: 0, width: lineW, textStart: start, textEnd: end, fontId: 0 };
-=======
     sharedArena.allocSpan();
     spanCount++;
 
     const span: Span = { x: 0, width: lineW, textStart: start, textEnd: forcedBreak >= 0 ? forcedBreak : end, fontId: 0 };
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     const line: Line = { x: 0, y: cursorY, width: lineW, height: lineHeight, spans: [span] };
     lines.push(line);
     totalWidth = Math.max(totalWidth, lineW);
     cursorY += lineHeight;
-<<<<<<< HEAD
-    start = end;
-    while (start < len && text[start] === 0x0020) start++;
-=======
 
     if (forcedBreak >= 0) {
       start = forcedBreak + 1;
@@ -387,7 +338,6 @@ function solveLayout(params: LayoutParams): LayoutResult {
       start = end;
       while (start < len && (text[start] === 0x0020 || text[start] === 0x0009)) start++;
     }
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     if (lines.length >= MAX_LINES) break;
   }
 
@@ -405,8 +355,6 @@ function toCodePoints(text: string): Uint32Array {
   return new Uint32Array(points);
 }
 
-<<<<<<< HEAD
-=======
 // Proportional width estimation (mirrors compat.ts classifyWidth)
 const NARROW_SET = new Set([0x69,0x6C,0x7C,0x21,0x3A,0x3B,0x2C,0x2E,0x27,0x60,0x31]);
 const XWIDE_SET = new Set([0x4D,0x57,0x40]);
@@ -429,7 +377,6 @@ function classifyWidth(cp: number): number {
   return 7.5;
 }
 
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
 function prepare(text: string) {
   const codepoints = toCodePoints(text);
   const entries: GlyphEntry[] = [];
@@ -437,11 +384,7 @@ function prepare(text: string) {
   for (let i = 0; i < codepoints.length; i++) {
     if (!seen.has(codepoints[i])) {
       seen.add(codepoints[i]);
-<<<<<<< HEAD
-      entries.push({ codepoint: codepoints[i], fontId: 0, width: 8 });
-=======
       entries.push({ codepoint: codepoints[i], fontId: 0, width: classifyWidth(codepoints[i]) });
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
     }
   }
   return { codepoints, glyphTable: createGlyphTable(entries) };
@@ -793,11 +736,7 @@ describe("Integration: compat layer", () => {
     for (let i = 0; i < codepoints.length; i++) {
       total += getWidth(glyphTable, codepoints[i], 0);
     }
-<<<<<<< HEAD
-    assert.equal(total, 24); // 3 chars × 8px each
-=======
     assert.equal(total, 27); // 3 uppercase chars × 9px each
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   });
 
   it("handles empty string", () => {
@@ -900,8 +839,6 @@ describe("LRU Cache behavior", () => {
     assert.equal(cache.size, 1);
   });
 });
-<<<<<<< HEAD
-=======
 
 // =================== PRACTICALITY TESTS ===================
 
@@ -1075,4 +1012,3 @@ describe("Edge cases", () => {
     assert.ok(result.lines.length >= 3, `Expected >= 3 lines, got ${result.lines.length}`);
   });
 });
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)

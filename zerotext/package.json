@@ -1,10 +1,7 @@
 {
   "name": "zerotext",
   "version": "0.1.0",
-<<<<<<< HEAD
-=======
   "private": true,
->>>>>>> b51e855 (feat: add docs/ demo site with pipeline visualization and browser test suite)
   "type": "module",
   "workspaces": [
     "packages/*",
